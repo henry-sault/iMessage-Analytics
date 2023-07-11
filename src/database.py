@@ -5,6 +5,7 @@ con = sqlite3.connect("chat.db")
 
 cur = con.cursor()
 
+# Moe
 
 # execute a query
 cur.execute('''SELECT
