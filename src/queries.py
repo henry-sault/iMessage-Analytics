@@ -5,8 +5,8 @@ con = sqlite3.connect("chat.db")
 cursor = con.cursor()
 
 
-def get_reaction_messages_from_chat_identifier():
-    cursor.execute('''
+def get_reaction_messages_from_chat_identifier(chat_identifier):
+    cursor.execute(f'''
        SELECT  m.associated_message_guid, 
         CASE 
             WHEN m.associated_message_type = 2000
@@ -35,7 +35,7 @@ def get_reaction_messages_from_chat_identifier():
         LEFT JOIN handle h
         ON h.ROWID = hj.handle_id
 
-        where chat_identifier = 'chat783632288714701473'
+        where chat_identifier = '{chat_identifier}'
         and associated_message_type IN (2000, 2001, 2002, 2003, 2004, 2005);
 
                    ''')
