@@ -1,3 +1,7 @@
 chat.db
 dtfl.csv
-messages/
+db-viewer/
+.ipynb_checkpoints/
+__pycache__
+Untitled.ipynb
+.DS_Store

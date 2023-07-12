@@ -14,10 +14,10 @@ WORKDIR /home/jovyan/work
 
 RUN cd .. && \
     sudo rm -rf ./work/
-COPY /src/ ./src/.
+COPY /src/ .
 COPY requirements.txt .
 COPY ${FILE_NAME} .
-RUN chown -R jovyan:root ./src/
+RUN chown -R jovyan:root .
 
 USER jovyan
 
