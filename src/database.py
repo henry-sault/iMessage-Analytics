@@ -5,11 +5,9 @@ from queries import (
     get_all_groupchat_identifiers,
     get_original_messages_from_chat_identifier,
     get_reaction_messages_from_chat_identifier)
-con = sqlite3.connect("./chat.db")
+con = sqlite3.connect("chat.db")
 
 cur = con.cursor()
-
-
 # execute a query
 df = get_all_groupchat_identifiers(cur)
 print(df)

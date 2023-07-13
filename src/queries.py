@@ -88,3 +88,18 @@ def get_all_groupchat_identifiers() -> pd.DataFrame:
     df = pd.DataFrame(results, columns=('display_name', 'chat_identifier'))
 
     return df
+
+
+def get_all_non_groupchat_identifiers() -> pd.DataFrame:
+
+    cursor.execute('''
+        SELECT display_name, 
+                chat_identifier
+        FROM chat
+        WHERE display_name is null or display_name = '';
+                ''')
+
+    results = cursor.fetchall()
+    df = pd.DataFrame(results, columns=('display_name', 'chat_identifier'))
+
+    return df
