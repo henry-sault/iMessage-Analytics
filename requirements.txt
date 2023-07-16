@@ -1,3 +1,4 @@
 duckdb==0.8.1
 pandas
-chardet
+polars
+pyarrow
