@@ -8,6 +8,9 @@ from queries import (
 con = sqlite3.connect("chat.db")
 
 cur = con.cursor()
+
+# Moe
+
 # execute a query
 df = get_all_groupchat_identifiers(cur)
 print(df)
