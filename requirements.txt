@@ -2,3 +2,4 @@ duckdb==0.8.1
 pandas
 polars
 pyarrow
+PyDictionary

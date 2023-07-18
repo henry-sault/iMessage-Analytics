@@ -1,5 +1,6 @@
 import pandas as pd
 import polars as pl
+from PyDictionary import PyDictionary
 
 
 class Messages():
@@ -17,6 +18,8 @@ class Messages():
         words_list = self.all_messages.select(
             words=pl.col("text").str.split(by=" "),
             id=pl.col('id'),
+            handle=pl.col('handle_id'),
+            date=pl.col('datetime')
         )
         lf = words_list.lazy()
         # clean up empty word strings
@@ -28,13 +31,8 @@ class Messages():
 
         return words_df
 
-    def join_words_with_messages(self, words):
-        words = words.join(self.all_messages, on='id',
-                           how='inner')
-        words = words.select(
-            id=pl.col('id'),
-            word=pl.col('words'),
-            handle=pl.col('handle_id'),
-            date=pl.col('datetime'))
-        words = words.unique(keep='any')
-        return words
+    def group_by_most_common_words(self):
+        # explode messages into words
+        words_df = self.parse_messages_into_words()
+        lf = words_df.lazy()
+        grouped_lf = lf.groupby()
