@@ -4,15 +4,62 @@ from PyDictionary import PyDictionary
 
 
 class Messages():
-    def __init__(self, messages: pd.DataFrame, reactions: pd.DataFrame):
-        self.all_messages: pl.Dataframe = pl.from_pandas(messages)
-        self.all_reactions: pl.Dataframe = pl.from_pandas(reactions)
+    def __init__(self, messages: pd.DataFrame, reactions: pd.DataFrame, handle: pd.DataFrame):
+        self.all_messages: pl.DataFrame = self.clean_messages(
+            pl.from_pandas(messages))
+        self.all_reactions: pl.DataFrame = self.clean_reactions(
+            pl.from_pandas(reactions))
+        self.handles: pl.DataFrame = self.clean_handles(pl.from_pandas(handle))
+        self.SQL = pl.SQLContext()
 
-    def get_handles_from_groupchat(self):
-        print('moe')
+    def clean_handles(self, handles):
+        user = {"handles": ["User"]}
+        df = pl.DataFrame(user)
+        handles = pl.concat([handles, df])
 
-    def attach_names_to_handle(self):
-        print('moe')
+        return handles
+
+    def clean_messages(self, messages):
+        messages = messages.select(
+            id=pl.col("id"),
+            datetime=pl.col("datetime"),
+            text=pl.col("text"),
+            handle_id=pl.when(pl.col("is_from_me") == 1).then("User").otherwise(pl.col("handle_id")))
+
+        return messages
+
+    def clean_reactions(self, reactions):
+        reactions = reactions.select(
+            associated_message_id=pl.col("associated_message_id"),
+            reaction_type=pl.col("reaction_type"),
+            datetime=pl.col("datetime"),
+            handle_id=pl.when(pl.col("is_from_me") == 1).then("User").otherwise(pl.col("handle_id")))
+
+        return reactions
+
+    def replace_column_with_series(self, df: pl.DataFrame, column: str, series: pl.Series) -> pl.DataFrame:
+        df.replace(pl.col(column), series)
+
+        return df
+
+    def replace_handles_with_names(self, mapping_dict: dict):
+        handle_dict = {}
+        for key, value in mapping_dict.items():
+            handle_dict[self.handles.item(key, 0)] = value
+        self.handles = self.handles.select(
+            handles=pl.col(
+                "handles").map_dict(handle_dict).alias("handles")
+        )
+        messages_series = self.all_messages.select(
+            handle_id=pl.col(
+                "handle_id").map_dict(handle_dict).alias("handle_id")).to_series()
+        reactions_series = self.all_reactions.select(
+            handle_id=pl.col(
+                "handle_id").map_dict(handle_dict).alias("handle_id")).to_series()
+        self.all_messages = self.replace_column_with_series(
+            self.all_messages, 'handle_id', messages_series)
+        self.all_reactions = self.replace_column_with_series(
+            self.all_reactions, 'handle_id', reactions_series)
 
     def parse_messages_into_words(self):
         words_list = self.all_messages.select(

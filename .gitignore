@@ -1,5 +1,7 @@
 chat.db
 dtfl.csv
+chat.db-shm
+chat.db-wal
 db-viewer/
 .ipynb_checkpoints/
 __pycache__

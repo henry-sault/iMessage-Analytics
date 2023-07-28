@@ -22,8 +22,9 @@ def get_reaction_messages_from_chat_identifier(chat_identifier):
             WHEN m.associated_message_type = 2005
             THEN 'questioned'
             ELSE m.associated_message_type
-        END AS reaction_type,            
+        END AS reaction_type,
         datetime(m.date / 1000000000 + strftime ("%s", "2001-01-01"), "unixepoch", "localtime") AS message_date,
+        m.is_from_me,
         h.id
         FROM chat c
         LEFT JOIN chat_message_join j
@@ -43,7 +44,7 @@ def get_reaction_messages_from_chat_identifier(chat_identifier):
     results = cursor.fetchall()
 
     df = pd.DataFrame(results, columns=('associated_message_id',
-                      'reaction_type', 'datetime', 'handle_id'))
+                      'reaction_type', 'datetime', 'is_from_me', 'handle_id'))
 
     return df
 
@@ -53,6 +54,7 @@ def get_original_messages_from_chat_identifier(chat_identifier) -> pd.DataFrame:
         SELECT  m.guid, 
                 datetime (m.date / 1000000000 + strftime ("%s", "2001-01-01"), "unixepoch", "localtime") AS message_date,
                 m.text,
+                m.is_from_me,
                 h.id
         from chat c
         join chat_message_join j
@@ -70,7 +72,8 @@ def get_original_messages_from_chat_identifier(chat_identifier) -> pd.DataFrame:
 
     results = cursor.fetchall()
 
-    df = pd.DataFrame(results, columns=('id', 'datetime', 'text', 'handle_id'))
+    df = pd.DataFrame(results, columns=('id', 'datetime',
+                      'text', 'is_from_me', 'handle_id'))
 
     return df
 
@@ -86,6 +89,21 @@ def get_all_groupchat_identifiers() -> pd.DataFrame:
 
     results = cursor.fetchall()
     df = pd.DataFrame(results, columns=('display_name', 'chat_identifier'))
+
+    return df
+
+
+def get_handles_for_groupchat_identifiers(chat_identifier) -> pd.DataFrame:
+
+    cursor.execute(f'''
+        SELECT h.id
+        FROM chat_handle_join j
+        LEFT JOIN chat chat ON j.chat_id = chat.ROWID
+        LEFT JOIN handle h on h.ROWID = j.handle_id
+        WHERE chat.chat_identifier = '{chat_identifier}'
+                   ''')
+    results = cursor.fetchall()
+    df = pd.DataFrame(results, columns=["handles"])
 
     return df
 

@@ -4,15 +4,15 @@ import pandas as pd
 from queries import (
     get_all_groupchat_identifiers,
     get_original_messages_from_chat_identifier,
-    get_reaction_messages_from_chat_identifier)
+    get_reaction_messages_from_chat_identifier,
+    get_handles_for_groupchat_identifiers)
 con = sqlite3.connect("chat.db")
 
-cur = con.cursor()
 
 # Moe
 
 # execute a query
-df = get_all_groupchat_identifiers(cur)
+df = get_handles_for_groupchat_identifiers('chat328831580126696185')
 print(df)
 
 # # fetch the results
