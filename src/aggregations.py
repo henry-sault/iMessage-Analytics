@@ -12,6 +12,10 @@ class Messages():
         self.handles: pl.DataFrame = self.clean_handles(pl.from_pandas(handle))
         self.SQL = pl.SQLContext()
 
+    ################################
+    # Clean inherent class DataFrames
+    ################################
+
     def clean_handles(self, handles):
         user = {"handles": ["User"]}
         df = pl.DataFrame(user)
@@ -38,7 +42,7 @@ class Messages():
         return reactions
 
     def replace_column_with_series(self, df: pl.DataFrame, column: str, series: pl.Series) -> pl.DataFrame:
-        df.replace(pl.col(column), series)
+        df.replace(column, series)
 
         return df
 
@@ -52,10 +56,12 @@ class Messages():
         )
         messages_series = self.all_messages.select(
             handle_id=pl.col(
-                "handle_id").map_dict(handle_dict).alias("handle_id")).to_series()
+                "handle_id").map_dict(handle_dict).alias("handle_id"))\
+            .to_series()
         reactions_series = self.all_reactions.select(
             handle_id=pl.col(
-                "handle_id").map_dict(handle_dict).alias("handle_id")).to_series()
+                "handle_id").map_dict(handle_dict).alias("handle_id"))\
+            .to_series()
         self.all_messages = self.replace_column_with_series(
             self.all_messages, 'handle_id', messages_series)
         self.all_reactions = self.replace_column_with_series(
