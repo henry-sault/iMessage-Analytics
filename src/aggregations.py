@@ -34,7 +34,7 @@ class Messages():
 
     def clean_reactions(self, reactions):
         reactions = reactions.select(
-            associated_message_id=pl.col("associated_message_id"),
+            id=pl.col("associated_message_id").str.slice(4),
             reaction_type=pl.col("reaction_type"),
             datetime=pl.col("datetime"),
             handle_id=pl.when(pl.col("is_from_me") == 1).then("User").otherwise(pl.col("handle_id")))
@@ -89,3 +89,23 @@ class Messages():
         words_df = self.parse_messages_into_words()
         lf = words_df.lazy()
         grouped_lf = lf.groupby()
+
+    def get_top_ten_messages_by_reaction(self, reaction_type: str) -> pl.DataFrame:
+
+        # lazy_reactions = pl.LazyFrame(self.all_reactions)
+        # lazy_messages = pl.LazyFrame(self.all_messages)
+        df = self.all_messages.join(
+            other=self.all_reactions,
+            how='left',
+            on='id'
+        )
+        print(df)
+        df = df.groupby("id").agg(
+            pl.col("reaction_type").where(pl.col("reaction_type") == reaction_type).sum().alias(f"num_reactions")
+        ).sort("num_reactions", descending=True)
+        df = df
+        print(df)
+        
+        return df
+
+        
